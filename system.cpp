@@ -103,12 +103,12 @@ void System::mc_move_verlet()
    } 
 }
 
-System::System(int seed, unsigned int N, double L, Potential potential, double d, double rv)
+System::System(int seed, unsigned int Ninit, double L, double Lwall, Potential potential, double d, double rv)
 : udist11(-1,1), udist01(0,1), u_int_dist(0,N-1), seed(seed),rng(seed), 
     rudist11(rng,udist11), rudist01(rng,udist01),
-    N(N), L(L), potential(potential),  d(d), rv(rv),
-    particles(N), particles_before_update(N),
-    verletList(N, std::vector<int>(N) ), neighbour_number_list(N,0)
+    Ninit(Ninit),N(Ninit), L(L), Lwall(Lwall), potential(potential),  d(d), rv(rv),
+    particles(2*Ninit), particles_before_update(2*Ninit),
+    verletList(N, std::vector<int>(2*Ninit) ), neighbour_number_list(2*Ninit)
 {
     Ntry = 0;
     Nacc = 0;

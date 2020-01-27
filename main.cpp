@@ -1,6 +1,5 @@
 
 #include "xyz.h"
-#include "pair_correlation.h"
 #include "potential.h"
 #include "system.h"
 #include "configFile.h"
@@ -23,8 +22,9 @@ int main()
     int print_every = config.get_parameter<int>("print_every");
 
     int seed = config.get_parameter<int>("seed");
-    int N = config.get_parameter<int>("N");
+    int Ninit = config.get_parameter<int>("Ninit");
     double L = config.get_parameter<double>("L");
+    double Lwall = config.get_parameter<double>("Lwall");
     double d = config.get_parameter<double>("d");
 
     double rhs = config.get_parameter<double>("rhs");
@@ -37,9 +37,8 @@ int main()
 
     double bs = (1.*L)/(1.*Nbin);
 
-	PairCorrelation pc(N,L,Nbin,bs);
     Potential potential(A,alpha, rhs, rc);
-    System system(seed, N, L,potential, d, rv);
+    System system(seed, Ninit, L, Lwall, potential, d, rv);
 
 
     for(int t=0; t<T_init; ++t) {
@@ -68,16 +67,14 @@ int main()
             system.mc_move_verlet();
         }
 
-        if( t%T_sample == 0)
-            pc.sample(system.particles);
+        //if( t%T_sample == 0)
+            // sample
     }
     cout <<( (double) system.Nacc)/( (double) system.Ntry) << endl;
 
     cout << system.Nverlet << endl;
     cout << system.Nacc/( (double) system.Ntry ) << endl;
 
-    pc.normalize();
-    pc.write("gr.dat");
 
     return 0;
 }

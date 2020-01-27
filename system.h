@@ -13,7 +13,7 @@
 
 class System {
 public:
-    System( int seed, unsigned int N, double L, Potential potential, double d, double rv);
+    System( int seed, unsigned int N, double L, double Lwall, Potential potential, double d, double rv);
 
 	// random number generator
     // uniform distribution [-1,1]
@@ -43,6 +43,7 @@ public:
 
     unsigned int N;      // number of particles
     double L;   // system size
+    double Lwall;
     Potential potential; 
     double d;  // move size 
     double rv;  // radius of Verlet sphere
