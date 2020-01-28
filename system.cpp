@@ -1,16 +1,108 @@
 #include "system.h"
 
+/*
+    change pbc to pbc in yz
+    remove N > 2 cond. in remove
+*/
+
+
+void System::mc_rand()
+{
+    double r = rudist01();
+    if( r < 1./3 ) {
+        mc_add();
+    } else if( r > 2./3. ) {
+        if( N > 2 ) mc_remove();
+    } else {
+        mc_move();
+    }
+}
+
+void System::mc_add()
+{
+
+
+    // random displacement
+    XYZ new_position( Lwall*rudist01(), L*rudist01(), L*rudist01() );
+    
+    Ntry += 1;
+
+    bool wall_overlap = potential.get_wall_overlap(new_position);
+    if(!wall_overlap) {
+        double deltaU = 0;
+        bool overlap = false;
+        double new_dist;
+        for(unsigned int ni = 0; ni<N; ++ni) {
+
+            new_dist = xyz::dist_pbcYZ(new_position, particles[ni].r, L);
+
+            overlap = potential.get_overlap(new_dist);
+            if( overlap ) break;
+
+            deltaU += potential.U(new_dist);
+        }
+
+        if( !overlap ) {
+            double V = L*L*Lwall;
+            if( rudist01() < std::exp( -deltaU + mu )*V/(N+1) ) {
+                particles[N].r = new_position;
+                ++N;
+
+                // apply periodic boundary conditions
+                //particles[i].r.pbc(L);
+                Nacc += 1;
+            } 
+        }
+
+    }
+}
+void System::mc_remove()
+{
+
+
+    // random displacement
+    unsigned int i = (int)(N*rudist01()); 
+
+    Ntry += 1;
+
+    double deltaU = 0;
+    double dist;
+    for(unsigned int ni = 0; ni<N; ++ni) {
+        if(ni == i ) continue;
+
+        dist = xyz::dist_pbcYZ(particles[i].r, particles[ni].r, L);
+
+
+        deltaU -= potential.U(dist);
+    }
+
+    double V = L*L*Lwall;
+    if( rudist01() < std::exp( -deltaU - mu )*N/V ) {
+        particles[i] = particles[N-1];
+        --N;
+
+        // apply periodic boundary conditions
+        //particles[i].r.pbc(L);
+        Nacc += 1;
+    } 
+
+}
+
+
+
 // make a move, and check all particles
 void System::mc_move()
 {
 
     // random particle index 
-    unsigned int i = u_int_dist(rng); 
+    unsigned int i = (int)(N*rudist01()); 
 
     // random displacement
     XYZ dr( d*rudist11(), d*rudist11(), d*rudist11() );
     XYZ new_position = particles[i].r + dr;
-
+        
+    bool wall_overlap = potential.get_wall_overlap(new_position);
+    if( wall_overlap) return ;
     Ntry += 1;
 
     double deltaU = 0;
@@ -21,8 +113,8 @@ void System::mc_move()
 
         if( ni == i ) continue;
 
-        old_dist = xyz::dist_pbc(particles[i].r, particles[ni].r, L);
-        new_dist = xyz::dist_pbc(new_position, particles[ni].r, L);
+        old_dist = xyz::dist_pbcYZ(particles[i].r, particles[ni].r, L);
+        new_dist = xyz::dist_pbcYZ(new_position, particles[ni].r, L);
 
         overlap = potential.get_overlap(new_dist);
         if( overlap ) break;
@@ -103,10 +195,10 @@ void System::mc_move_verlet()
    } 
 }
 
-System::System(int seed, unsigned int Ninit, double L, double Lwall, Potential potential, double d, double rv)
+System::System(int seed, unsigned int Ninit,double mu, double L, double Lwall, Potential potential, double d, double rv)
 : udist11(-1,1), udist01(0,1), u_int_dist(0,N-1), seed(seed),rng(seed), 
     rudist11(rng,udist11), rudist01(rng,udist01),
-    Ninit(Ninit),N(Ninit), L(L), Lwall(Lwall), potential(potential),  d(d), rv(rv),
+    N(Ninit),mu(mu), L(L), Lwall(Lwall), potential(potential),  d(d), rv(rv),
     particles(2*Ninit), particles_before_update(2*Ninit),
     verletList(N, std::vector<int>(2*Ninit) ), neighbour_number_list(2*Ninit)
 {

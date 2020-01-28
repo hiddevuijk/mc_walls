@@ -13,7 +13,7 @@
 
 class System {
 public:
-    System( int seed, unsigned int N, double L, double Lwall, Potential potential, double d, double rv);
+    System( int seed, unsigned int N, double mu, double L, double Lwall, Potential potential, double d, double rv);
 
 	// random number generator
     // uniform distribution [-1,1]
@@ -35,13 +35,17 @@ public:
     void init_random_shift();
 
     // attemt to move a particle
+    void mc_rand();
     void mc_move();
     void mc_move_verlet();
+    void mc_add();
+    void mc_remove();
 
      
     void update_verlet_list();
 
     unsigned int N;      // number of particles
+    double mu;
     double L;   // system size
     double Lwall;
     Potential potential; 

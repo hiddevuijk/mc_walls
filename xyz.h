@@ -76,6 +76,8 @@ double dist(const XYZ &c1, const XYZ &c2);
 // same as dist, but with periodic boundary conditions
 double dist_pbc(const XYZ &c1, const XYZ &c2, double L);
 
+// same as dist_pbc, but with periodic boundary conditions in yz only
+double dist_pbcYZ(const XYZ &c1, const XYZ &c2, double L);
 
 // returns the distance squared
 double dist_sq(const XYZ &c1, const XYZ &c2);

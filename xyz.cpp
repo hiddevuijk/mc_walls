@@ -122,6 +122,16 @@ double xyz::dist_pbc(const XYZ &c1, const XYZ &c2, double L)
 	return sqrt(d.x*d.x + d.y*d.y + d.z*d.z);
 }
 
+double xyz::dist_pbcYZ(const XYZ &c1, const XYZ &c2, double L)
+{
+	XYZ d( c1.x-c2.x, c1.y-c2.y, c1.z-c2.z );
+
+	d.y -= L*round(d.y/L);
+    d.z -= L*round(d.z/L);
+
+	return sqrt(d.x*d.x + d.y*d.y + d.z*d.z);
+}
+
 
 // returns the distance squared
 double xyz::dist_sq(const XYZ &c1, const XYZ &c2)

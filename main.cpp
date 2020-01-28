@@ -3,6 +3,7 @@
 #include "potential.h"
 #include "system.h"
 #include "configFile.h"
+#include "density.h"
 
 
 #include <vector>
@@ -23,6 +24,7 @@ int main()
 
     int seed = config.get_parameter<int>("seed");
     int Ninit = config.get_parameter<int>("Ninit");
+    double mu = config.get_parameter<double>("mu");
     double L = config.get_parameter<double>("L");
     double Lwall = config.get_parameter<double>("Lwall");
     double d = config.get_parameter<double>("d");
@@ -37,44 +39,62 @@ int main()
 
     double bs = (1.*L)/(1.*Nbin);
 
-    Potential potential(A,alpha, rhs, rc);
-    System system(seed, Ninit, L, Lwall, potential, d, rv);
+    Potential potential(Lwall, A,alpha, rhs, rc);
+    System system(seed, Ninit,mu, L, Lwall, potential, d, rv);
+    Density density(Lwall, Nbin, bs);
 
 
     for(int t=0; t<T_init; ++t) {
 
         if(t%print_every == 0) {
+            cout << system.N << endl;
             cout <<T+T_init << '\t' <<  t << endl;
+            cout << system.Nacc << endl;
             cout << system.Nacc/( (double) system.Ntry ) << endl << endl;
+            system.Nacc = 0;
+            system.Ntry = 0;
         }
 
         for(int tmc=0; tmc<Tmc; ++tmc) {
+            system.mc_rand();
+
+            //system.mc_add();
+            //// change to 0
+            //if(system.N>1) system.mc_remove();
+            //
             //system.mc_move();
-            system.mc_move_verlet();
+            ////system.mc_move_verlet();
+        
         }
     }
     
-    
-    for(int t=0; t<T; ++t) {
+
+    for(int t=T_init; t<(T+T_init); ++t) {
 
         if(t%print_every == 0) {
-            cout <<T+T_init << '\t' <<  t+T_init << endl;
+            cout << system.N << endl;
+            cout <<T+T_init << '\t' <<  t << endl;
+            cout << system.Nacc << endl;
             cout << system.Nacc/( (double) system.Ntry ) << endl << endl;
+            system.Nacc = 0;
+            system.Ntry = 0;
         }
 
         for(int tmc=0; tmc<Tmc; ++tmc) {
+            system.mc_rand();
+    
+            //system.mc_add();
+            //// change to 0
+            //if(system.N>1) system.mc_remove();
             //system.mc_move();
-            system.mc_move_verlet();
+            ////system.mc_move_verlet();
+        
         }
-
-        //if( t%T_sample == 0)
-            // sample
+        
+        density.sample(system.particles, system.N);
     }
-    cout <<( (double) system.Nacc)/( (double) system.Ntry) << endl;
-
-    cout << system.Nverlet << endl;
-    cout << system.Nacc/( (double) system.Ntry ) << endl;
-
-
+    cout << system.Nacc / (double) system.Ntry << endl; 
+    cout <<  system.Ntry << endl; 
+    density.write("rho.dat");
     return 0;
 }

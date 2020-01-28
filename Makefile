@@ -1,5 +1,5 @@
 TARGET = test.exe
-OBJS = main.o xyz.o system.o configFile.o neighbour_check.o
+OBJS = main.o xyz.o system.o configFile.o neighbour_check.o density.o
 CC = g++
 #CFLAGS = -c -Wall -g -std=c++11
 #LFLAGS = -Wall -g
@@ -19,8 +19,11 @@ system.o: system.cpp system.h
 configFile.o: configFile.cpp configFile.h
 	$(CC) $(CFLAGS) configFile.cpp
 
-main.o: main.cpp xyz.h system.h potential.h neighbour_check.h
+main.o: main.cpp xyz.h system.h potential.h neighbour_check.h density.h
 	$(CC) $(CFLAGS) main.cpp
+
+density.o: density.cpp xyz.h particle.h
+	$(CC) $(CFLAGS) density.cpp
 
 neighbour_check.o: neighbour_check.h neighbour_check.cpp
 	$(CC) $(CFLAGS) neighbour_check.cpp
