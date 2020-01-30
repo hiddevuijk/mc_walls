@@ -1,44 +1,26 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sys import exit
+# ,rho_mu_minus1,rho_mu_minus1_25,rho_mu_minus1_5,rho_mu_minus1_75,rho_mu_minus2,rho_mu_minus2_25,rho_mu_minus2_5,z
 
-N = 100
-L = 17.997
-rho = N/(L**3)
-
-A = 1.
-alpha = 1.8
-
-def g1(rho):
-    eta = np.pi*rho/6
-    return (1+0.5*eta)/( (1-eta)**2 )
+data = np.loadtxt("data.dat", delimiter=',')
+n = data[:,0]
+z = data[:,-1]
+rho = data[:,1]
 
 
-def phi(r):
-    u = -A*np.exp(-alpha*(r-1) )/r
-    return np.exp(-u)
-rr = np.linspace(1,10,1000) 
-grr = phi(rr)
+data = np.loadtxt("rho.dat")
+simz = data[:,0]
+simrho = data[:,1]
 
-gr = np.loadtxt("gr.dat")
-r = gr[:,0] + 1
-g = gr[:,1]
+plt.plot(simz,simrho, label="sim")
 
-gr = np.loadtxt("gr1.dat")
-r1 = gr[:,0] + 1
-g1 = gr[:,1]
+plt.plot(z,rho)
 
-
-gr = np.loadtxt("sim.dat")
-rsim = gr[:,0]
-gsim= gr[:,1]
-
-#plt.plot(r1,g1, color='blue', label="square")
-plt.plot(r,g, color='black', label = "shift")
-#plt.plot(rsim,gsim, color='red', label = "data")
-#plt.plot(rr,grr, color='red')
-
-
-plt.title(rho)
+plt.xlim([0,10])
+plt.legend()
 plt.show()
+
+
+
 
